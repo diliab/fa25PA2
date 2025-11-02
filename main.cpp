@@ -95,7 +95,6 @@ int buildEncodingTree(int nextFree) {
     // 1. Create a MinHeap object.
     MinHeap heap;
     // 2. Push all leaf node indices into the heap
-
     for (int i = 0; i < nextFree; i++) {
         heap.push(i, weightArr);
     }
@@ -107,17 +106,20 @@ int buildEncodingTree(int nextFree) {
     //    - Push new parent index back into the heap
     // 4. Return the index of the last remaining node (root)
 
-    while (heap.size >1) {
+    while (heap.size > 1) {
         int left = heap.pop(weightArr);
         int right = heap.pop(weightArr);
 
-        int parent = ++nextFree;
+        int parent = nextFree++;
+        charArr[parent] = '#';
+
         weightArr[parent] = weightArr[left] + weightArr[right];
 
         leftArr[parent] = left;
         rightArr[parent] = right;
 
         heap.push(parent, weightArr);
+
     }
     return nextFree;
 
@@ -130,15 +132,32 @@ void generateCodes(int root, string codes[]) {
     // Left edge adds '0', right edge adds '1'.
     // Record code when a leaf node is reached.
 
-    stack<pair<int, string>> stack;
+    //using the stack<pair<int std library to simulate DFS traversal
+    stack< pair <int, string>> str;
+    str.push({root, ""});
 
-    //left edge
-    int leftedge[root] = (int pos) * 2 -1;
+    //while string is not empty (aka the dummy root string is there)
+    while (!str.empty()) {
+        auto [v, path] = str.top();
+        str.pop();
 
-    stack.push(make_pair(root, codes[0]));
-    stack.push(make_pair(root, codes[1]));
-
-
+        //checking to see if v is a leaf
+        bool isleaf = leftArr[v] == -1 && rightArr[v] == -1;
+        if (isleaf) {
+            //charting the path
+            int index = charArr[v] - 'a';
+            //single node only, check if path is empty
+            codes[index] = path.empty() ? "" : path;
+        }
+        else {
+            if (rightArr[v] != -1) {
+                str.push({rightArr[v], ""});
+            }
+            if (leftArr[v] != -1) {
+                str.push({leftArr[v], ""});
+            }
+        }
+    }
 }
 
 
@@ -149,7 +168,6 @@ void encodeMessage(const string& filename, string codes[]) {
     for (int i = 0; i < 26; ++i) {
         if (!codes[i].empty())
             cout << char('a' + i) << " : " << codes[i] << "\n";
-    }
 
     cout << "\nEncoded message:\n";
 
