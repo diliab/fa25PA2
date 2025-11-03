@@ -18,9 +18,14 @@ struct MinHeap {
 
     void push(int idx, int weightArr[]) {
         // TODO: insert index at end of heap, restore order using upheap()
-        weightArr[size] = idx;
+        if (size >= 64) {
+            return;
+        }
+
+        data[size] = idx;
         upheap(size,weightArr);
         size++;
+
     }
 
     int pop(int weightArr[]) {
@@ -33,56 +38,55 @@ struct MinHeap {
         }
         // deleting first index in array
         // making a temp value at the root
-        int temp = weightArr[0];
-        weightArr[0] = weightArr[size - 1];
+        int smallestind = data[0];
+        //move the last element into the root spot
+        data[0] = data[size-1];
         size --;
         downheap (0, weightArr);
-        return temp;
+        return smallestind;
     }
 
     void upheap(int pos, int weightArr[]) {
         // TODO: swap child upward while smaller than parent
-        int parentpos = (pos-1) / 2 ;
-        while ( (weightArr[pos] < weightArr[parentpos]) && (pos != 0) ) {
-            swap(weightArr[pos] , weightArr[parentpos]);
-            pos = parentpos;
-            parentpos = (pos - 1) / 2 ;
+        if (pos == 0 ) {
+            return;
+        }
+        //using the node index
+        while (pos > 0) {
+            int parentpos = (pos - 1) / 2 ;
+            if ( (weightArr[data[pos]] < weightArr[data[parentpos]]) ) {
+                swap(data[pos] , data[parentpos]);
+                pos = parentpos;
+            } else {
+                return;
+            }
         }
     }
 
     void downheap(int pos, int weightArr[]) {
         // TODO: swap parent downward while larger than any child
 
-        if (size <= 1) {
-            return;
-        }
-
-
-        //establish the left and right child
-        int leftchild = (2 * pos) + 1;
-        int rightchild = (2 * pos) + 2;
-        int smallestchild = pos;
-        int tmp;
-
         while (true) {
             //establish the left and right child
-            int leftchildpos = (2 * pos) + 1;
-            int rightchildpos = (2 * pos) + 2;
-            smallestchild = pos;
+            int leftchild = (2 * pos) + 1;
+            int rightchild = (2 * pos) + 2;
+
+            int smallestchild = pos;
+            int tmp;
 
             //determine which child is the smallest
-            if (leftchild < size && weightArr[leftchild] > weightArr[smallestchild]) {
+            if (leftchild < size && weightArr[data[leftchild]] < weightArr[data[smallestchild]]) {
                 smallestchild = leftchild;
             }
-            //checking right now
-            if (rightchild < size && weightArr[rightchild] > weightArr[smallestchild]) {
+            //checking right child
+            if (rightchild < size && weightArr[data[rightchild]] < weightArr[data[smallestchild]]) {
                 smallestchild = rightchild;
             }
             //check if smallest child is where pos is right now
             if (smallestchild == pos) {
                 return;
             }
-            swap(weightArr[pos] , weightArr[smallestchild]);
+            swap(data[pos] , data[smallestchild]);
             pos = smallestchild;
             }
         }
